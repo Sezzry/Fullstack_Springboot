@@ -1,29 +1,24 @@
-package com.example.sensor;
+package com.example.fullstack_springboot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.context.annotation.Bean;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import javax.sql.DataSource;
-
-import lombok.Getter;
-import lombok.Setter;
 
 @SpringBootApplication
 public class FullstackSpringbootApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(com.example.sensor.FullstackSpringbootApplication.class, args);
+		SpringApplication.run(FullstackSpringbootApplication.class, args);
 	}
 
 	// Database configuration
@@ -40,36 +35,7 @@ public class FullstackSpringbootApplication {
 	// Command line runner to test inserting a dummy record (Optional)
 	@Bean
 	public CommandLineRunner commandLineRunner(SensorReadingRepository repository) {
-		return args -> {
-			repository.save(new SensorReading(25.5f, 60.2f, LocalDateTime.now()));
-		};
-	}
-}
-
-@Entity
-@Table(name = "sensor_readings")
-@Getter
-@Setter
-class SensorReading {
-
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-
-	private Float temperature;
-	private Float humidity;
-
-	@Column(name = "timestamp", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-	private LocalDateTime timestamp;
-
-	// Default constructor
-	public SensorReading() {}
-
-	// Parameterized constructor
-	public SensorReading(Float temperature, Float humidity, LocalDateTime timestamp) {
-		this.temperature = temperature;
-		this.humidity = humidity;
-		this.timestamp = timestamp;
+        return (String... args) -> repository.save(new SensorReading(25.5f, 60.2f, LocalDateTime.now()));
 	}
 }
 
@@ -83,13 +49,16 @@ interface SensorReadingRepository extends JpaRepository<SensorReading, Long> {
 @RequestMapping("/api/sensor")
 class SensorController {
 
-	@Autowired
-	private SensorReadingRepository sensorReadingRepository;
+	private final SensorReadingRepository sensorReadingRepository;
+
+	public SensorController(SensorReadingRepository sensorReadingRepository) {
+		this.sensorReadingRepository = sensorReadingRepository;
+	}
 
 	// Get the latest sensor reading
 	@GetMapping("/latest")
 	public SensorReading getLatestReading() {
-		return sensorReadingRepository.findTop10ByOrderByTimestampDesc().get(0);
+		return sensorReadingRepository.findTop10ByOrderByTimestampDesc().stream().findFirst().orElse(null);
 	}
 
 	// Get the last 10 sensor readings (history)
@@ -103,18 +72,21 @@ class SensorController {
 @Controller
 class DashboardController {
 
-	@Autowired
-	private SensorReadingRepository sensorReadingRepository;
+	private final SensorReadingRepository sensorReadingRepository;
+
+	public DashboardController(SensorReadingRepository sensorReadingRepository) {
+		this.sensorReadingRepository = sensorReadingRepository;
+	}
 
 	@GetMapping("/")
 	public String showDashboard(Model model) {
 		// Fetch the latest reading
-		model.addAttribute("latestReading", sensorReadingRepository.findTop10ByOrderByTimestampDesc().get(0));
+		model.addAttribute("latestReading", sensorReadingRepository.findTop10ByOrderByTimestampDesc().stream().findFirst().orElse(null));
 
 		// Fetch historical data
 		model.addAttribute("readings", sensorReadingRepository.findTop10ByOrderByTimestampDesc());
 
 		// Return the view name "dashboard"
-		return "dashboard";
+		return "dashboard"; // Ensure that you have a dashboard.html file in resources/templates
 	}
 }
