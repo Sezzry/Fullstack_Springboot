@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Sensor Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #2d2d2d;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<h1>Temperature and Humidity Dashboard</h1>
+<div class="chart-container">
+    <canvas id="temperatureChart"></canvas>
+</div>
+<div class="chart-container">
+    <canvas id="humidityChart"></canvas>
+</div>
+
+<script>
+    // Fetching historical sensor data from the backend
+    fetch('/api/sensor/history')
+        .then(response => response.json())
+        .then(data => {
+            // Extracting timestamps, temperatures, and humidity values
+            const labels = data.map(d => new Date(d.timestamp).toLocaleTimeString());
+            const temperatures = data.map(d => d.temperature);
+            const humidities = data.map(d => d.humidity);
+
+            // Creating the Temperature Chart
+            const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
+            new Chart(temperatureCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Temperature (°C)',
+                        data: temperatures,
+                        borderColor: 'rgba(255, 206, 86, 0.5)',
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'category',
+                            time: {
+                                unit: 'hour'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Creating the Humidity Chart
+            const humidityCtx = document.getElementById('humidityChart').getContext('2d');
+            new Chart(humidityCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Humidity (%)',
+                        data: humidities,
+                        borderColor: 'rgba(54, 162, 235, 0.5)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: 'category',
+                            time: {
+                                unit: 'hour'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+</script>
+</body>
+</html>
