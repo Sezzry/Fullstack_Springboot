@@ -31,6 +31,8 @@
     fetch('/api/sensor/history')
         .then(response => response.json())
         .then(data => {
+            data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
             // Extracting timestamps, temperatures, and humidity values
             const labels = data.map(d => new Date(d.timestamp).toLocaleTimeString());
             const temperatures = data.map(d => d.temperature);
