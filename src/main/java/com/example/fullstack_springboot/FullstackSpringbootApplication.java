@@ -27,7 +27,7 @@ public class FullstackSpringbootApplication {
 		DriverManagerDataSource dataSource = new DriverManagerDataSource();
 		dataSource.setUrl("jdbc:mysql://localhost:3306/sensor_data");
 		dataSource.setUsername("root");
-		dataSource.setPassword("K2TYRWgvK7VYGi&");
+		dataSource.setPassword("K2TYRWgvK7VYGi&"); // Change to your database password
 		dataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
 		return dataSource;
 	}
