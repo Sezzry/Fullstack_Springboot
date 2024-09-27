@@ -41,7 +41,7 @@ public class FullstackSpringbootApplication {
 
 // Repository interface for accessing sensor readings
 interface SensorReadingRepository extends JpaRepository<SensorReading, Long> {
-	List<SensorReading> findTop10ByOrderByTimestampDesc();
+	List<SensorReading> findTop50ByOrderByTimestampDesc();
 }
 
 // REST Controller for providing API endpoints
@@ -58,13 +58,13 @@ class SensorController {
 	// Get the latest sensor reading
 	@GetMapping("/latest")
 	public SensorReading getLatestReading() {
-		return sensorReadingRepository.findTop10ByOrderByTimestampDesc().stream().findFirst().orElse(null);
+		return sensorReadingRepository.findTop50ByOrderByTimestampDesc().stream().findFirst().orElse(null);
 	}
 
 	// Get the last 10 sensor readings (history)
 	@GetMapping("/history")
 	public List<SensorReading> getSensorHistory() {
-		return sensorReadingRepository.findTop10ByOrderByTimestampDesc();
+		return sensorReadingRepository.findTop50ByOrderByTimestampDesc();
 	}
 }
 
@@ -81,10 +81,10 @@ class DashboardController {
 	@GetMapping("/")
 	public String showDashboard(Model model) {
 		// Fetch the latest reading
-		model.addAttribute("latestReading", sensorReadingRepository.findTop10ByOrderByTimestampDesc().stream().findFirst().orElse(null));
+		model.addAttribute("latestReading", sensorReadingRepository.findTop50ByOrderByTimestampDesc().stream().findFirst().orElse(null));
 
 		// Fetch historical data
-		model.addAttribute("readings", sensorReadingRepository.findTop10ByOrderByTimestampDesc());
+		model.addAttribute("readings", sensorReadingRepository.findTop50ByOrderByTimestampDesc());
 
 		// Return the view name "dashboard"
 		return "dashboard"; // Ensure that you have a dashboard.html file in resources/templates
