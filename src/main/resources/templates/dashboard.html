@@ -27,77 +27,106 @@
 </div>
 
 <script>
-    // Fetching historical sensor data from the backend
-    fetch('/api/sensor/history')
-        .then(response => response.json())
-        .then(data => {
-            data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    // Initialize chart variables
+    let temperatureChart, humidityChart;
 
-            // Extracting timestamps, temperatures, and humidity values
-            const labels = data.map(d => new Date(d.timestamp).toLocaleTimeString());
-            const temperatures = data.map(d => d.temperature);
-            const humidities = data.map(d => d.humidity);
+    // Function to fetch data and update charts
+    function fetchDataAndUpdateCharts() {
+        fetch('/api/sensor/history')
+            .then(response => response.json())
+            .then(data => {
+                // Sort data by timestamp to ensure correct order
+                data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-            // Creating the Temperature Chart
-            const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
-            new Chart(temperatureCtx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Temperature (°C)',
-                        data: temperatures,
-                        borderColor: 'rgba(255, 206, 86, 0.5)',
-                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            type: 'category',
-                            time: {
-                                unit: 'hour'
-                            }
+                // Extracting timestamps, temperatures, and humidity values
+                const labels = data.map(d => new Date(d.timestamp).toLocaleTimeString());
+                const temperatures = data.map(d => d.temperature);
+                const humidities = data.map(d => d.humidity);
+
+                // Update or create the Temperature Chart
+                if (temperatureChart) {
+                    // Update existing chart data
+                    temperatureChart.data.labels = labels;
+                    temperatureChart.data.datasets[0].data = temperatures;
+                    temperatureChart.update();
+                } else {
+                    // Create Temperature Chart if it doesn't exist
+                    const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
+                    temperatureChart = new Chart(temperatureCtx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Temperature (°C)',
+                                data: temperatures,
+                                borderColor: 'rgba(255, 206, 86, 0.5)',
+                                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                                fill: true,
+                            }]
                         },
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            // Creating the Humidity Chart
-            const humidityCtx = document.getElementById('humidityChart').getContext('2d');
-            new Chart(humidityCtx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Humidity (%)',
-                        data: humidities,
-                        borderColor: 'rgba(54, 162, 235, 0.5)',
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        x: {
-                            type: 'category',
-                            time: {
-                                unit: 'hour'
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    type: 'category',
+                                    time: {
+                                        unit: 'hour'
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true
+                                }
                             }
-                        },
-                        y: {
-                            beginAtZero: true
                         }
-                    }
+                    });
                 }
-            });
-        });
+
+                // Update or create the Humidity Chart
+                if (humidityChart) {
+                    // Update existing chart data
+                    humidityChart.data.labels = labels;
+                    humidityChart.data.datasets[0].data = humidities;
+                    humidityChart.update();
+                } else {
+                    // Create Humidity Chart if it doesn't exist
+                    const humidityCtx = document.getElementById('humidityChart').getContext('2d');
+                    humidityChart = new Chart(humidityCtx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Humidity (%)',
+                                data: humidities,
+                                borderColor: 'rgba(54, 162, 235, 0.5)',
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                fill: true,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            scales: {
+                                x: {
+                                    type: 'category',
+                                    time: {
+                                        unit: 'hour'
+                                    }
+                                },
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching data:', error));
+    }
+
+    // Initial fetch and setup of charts
+    fetchDataAndUpdateCharts();
+
+    // Set an interval to update the data every 10 seconds
+    setInterval(fetchDataAndUpdateCharts, 10000);
 </script>
 </body>
 </html>
