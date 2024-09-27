@@ -1,97 +1,51 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sensor Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background-color: #2d2d2d;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        h1 {
-            background-color: #444;
-            color: #fff;
-            padding: 15px 30px;
-            margin: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            font-size: 2em;
-            text-align: center;
+            @apply bg-gray-900 text-white font-sans flex flex-col items-center;
         }
 
         .tab-container {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 10px;
-        }
-
-        .tab {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 0 5px;
-            cursor: pointer;
-            background-color: #444;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-
-        .tab.active {
-            background-color: #555;
+            @apply flex justify-center gap-4 mb-4;
         }
 
         .content-container {
-            position: relative;
-            width: calc(100% - 40px);
-            max-width: 800px;
-            margin: 10px 20px;
-            border: 1px solid #555;
-            border-radius: 10px;
-            padding: 10px;
-            display: none;
-            background-color: #3a3a3a;
+            @apply relative w-full max-w-4xl p-4 border border-gray-700 rounded-lg bg-gray-800 hidden;
         }
 
         .content-container.active {
             display: block;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            background-color: #3a3a3a;
-            border: 1px solid #555;
-            border-radius: 10px;
-            overflow: hidden;
+        .tab-button {
+            @apply px-4 py-2 rounded-md transition-colors;
         }
 
-        th, td {
-            padding: 8px 12px;
-            text-align: left;
-            border-bottom: 1px solid #555;
+        .tab-button.active {
+            @apply bg-blue-600 text-white;
         }
 
-        th {
-            background-color: #444;
+        .tab-button:not(.active):hover {
+            @apply bg-gray-700;
         }
     </style>
 </head>
 <body>
-<h1>Temperature and Humidity Dashboard</h1>
+<h1 class="bg-gray-800 text-white py-4 px-6 mb-6 rounded-lg shadow-lg text-2xl text-center">
+    Temperature and Humidity Dashboard
+</h1>
 
-<!-- Tab navigation -->
+<!-- Tab Navigation -->
 <div class="tab-container">
-    <span class="tab active" onclick="openTab('temperatureChartContainer')">Temperature</span>
-    <span class="tab" onclick="openTab('humidityChartContainer')">Humidity</span>
-    <span class="tab" onclick="openTab('dataTableContainer')">Data Table</span>
+    <button class="tab-button active" onclick="openTab('temperatureChartContainer')">Temperature</button>
+    <button class="tab-button" onclick="openTab('humidityChartContainer')">Humidity</button>
+    <button class="tab-button" onclick="openTab('dataTableContainer')">Data Table</button>
 </div>
 
 <!-- Temperature Chart Container -->
@@ -106,15 +60,15 @@
 
 <!-- Data Table Container -->
 <div id="dataTableContainer" class="content-container">
-    <table>
-        <thead>
+    <table class="min-w-full text-sm divide-y divide-gray-700">
+        <thead class="bg-gray-700">
         <tr>
-            <th>Timestamp</th>
-            <th>Temperature (°C)</th>
-            <th>Humidity (%)</th>
+            <th class="px-4 py-2 text-left text-white">Timestamp</th>
+            <th class="px-4 py-2 text-left text-white">Temperature (°C)</th>
+            <th class="px-4 py-2 text-left text-white">Humidity (%)</th>
         </tr>
         </thead>
-        <tbody id="dataTableBody">
+        <tbody id="dataTableBody" class="divide-y divide-gray-800">
         <!-- Data rows will be added here dynamically -->
         </tbody>
     </table>
@@ -132,7 +86,7 @@
         });
 
         // Deactivate all tabs
-        document.querySelectorAll('.tab').forEach(tab => {
+        document.querySelectorAll('.tab-button').forEach(tab => {
             tab.classList.remove('active');
         });
 
@@ -140,7 +94,7 @@
         document.getElementById(containerId).classList.add('active');
 
         // Activate the corresponding tab
-        const selectedTab = document.querySelector(`.tab[onclick="openTab('${containerId}')"]`);
+        const selectedTab = document.querySelector(`button[onclick="openTab('${containerId}')"]`);
         if (selectedTab) selectedTab.classList.add('active');
     }
 
@@ -159,12 +113,10 @@
 
                 // Update or create the Temperature Chart
                 if (temperatureChart) {
-                    // Update existing chart data
                     temperatureChart.data.labels = labels;
                     temperatureChart.data.datasets[0].data = temperatures;
                     temperatureChart.update();
                 } else {
-                    // Create Temperature Chart if it doesn't exist
                     const temperatureCtx = document.getElementById('temperatureChart').getContext('2d');
                     temperatureChart = new Chart(temperatureCtx, {
                         type: 'line',
@@ -198,12 +150,10 @@
 
                 // Update or create the Humidity Chart
                 if (humidityChart) {
-                    // Update existing chart data
                     humidityChart.data.labels = labels;
                     humidityChart.data.datasets[0].data = humidities;
                     humidityChart.update();
                 } else {
-                    // Create Humidity Chart if it doesn't exist
                     const humidityCtx = document.getElementById('humidityChart').getContext('2d');
                     humidityChart = new Chart(humidityCtx, {
                         type: 'line',
@@ -239,15 +189,15 @@
                 const dataTableBody = document.getElementById('dataTableBody');
                 dataTableBody.innerHTML = ''; // Clear existing rows
 
-                // Add rows dynamically
+                // Add rows dynamically, with newest data at the top
                 data.forEach(reading => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td>${new Date(reading.timestamp).toLocaleString()}</td>
-                        <td>${reading.temperature.toFixed(2)}</td>
-                        <td>${reading.humidity.toFixed(2)}</td>
-                    `;
-                    dataTableBody.appendChild(row);
+                            <td class="px-4 py-2">${new Date(reading.timestamp).toLocaleString()}</td>
+                            <td class="px-4 py-2">${reading.temperature.toFixed(2)}</td>
+                            <td class="px-4 py-2">${reading.humidity.toFixed(2)}</td>
+                        `;
+                    dataTableBody.insertBefore(row, dataTableBody.firstChild); // Insert each new row at the top
                 });
             })
             .catch(error => console.error('Error fetching data:', error));
